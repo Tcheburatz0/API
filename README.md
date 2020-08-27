@@ -1,4 +1,4 @@
-#  API for converting speech to text file 
+##  API for converting speech to text file 
 Template repository for all the projects.
 import xml.etree.ElementTree as XmlElementTree	
 import httplib2							
@@ -9,21 +9,21 @@ from config import ***
 ***_PATH = '/***_xml'
 CHUNK_SIZE = 1024 ** 2
  
-# функция дла принятия на вход файла размером до1 мб и реализация передачи по #частям
+## функция дла принятия на вход файла размером до1 мб и реализация передачи по частям
 def speech_to_text(filename=None, bytes=None, request_id=uuid.uuid4().hex, topic='notes', lang='ru-RU',
                	key=***_API_KEY):
   
-# Если передан файл
+## Если передан файл
 	if filename:
     	with open(filename, 'br') as file:
         	bytes = file.read()
 	if not bytes:
     	raise Exception('Neither file name nor bytes provided.')
  
-  # Конвертирование в нужный формат
+  ## Конвертирование в нужный формат
 	bytes = convert_to_pcm16b16000r(in_bytes=bytes)
  
-# Формирование тела запроса к API
+## Формирование тела запроса к API
 	url = ***_PATH + '?uuid=%s&key=%s&topic=%s&lang=%s' % (
     	request_id,
     	key,
@@ -31,10 +31,10 @@ def speech_to_text(filename=None, bytes=None, request_id=uuid.uuid4().hex, topic
     	lang
 	)
  
-# Считывание блока байтов
+## Считывание блока байтов
 	chunks = read_chunks(CHUNK_SIZE, bytes)
  
-# Установка соединения и формирование запроса
+## Установка соединения и формирование запроса
 	connection = httplib2.HTTPConnectionWithTimeout(***_HOST)
  
 	connection.connect()
@@ -43,7 +43,7 @@ def speech_to_text(filename=None, bytes=None, request_id=uuid.uuid4().hex, topic
 	connection.putheader('Content-Type', 'audio/x-pcm;bit=16;rate=16000')
 	connection.endheaders()
  
-  # Отправка байтов блоками
+  ## Отправка байтов блоками
 	for chunk in chunks:
     	connection.send(('%s\r\n' % hex(len(chunk))[2:]).encode())
     	connection.send(chunk)
@@ -52,7 +52,7 @@ def speech_to_text(filename=None, bytes=None, request_id=uuid.uuid4().hex, topic
 	connection.send('0\r\n\r\n'.encode())
 	response = connection.getresponse()
  
-# Обработка ответа сервера
+## Обработка ответа сервера
 	if response.code == 200:
     	response_text = response.read()
     	xml = XmlElementTree.fromstring(response_text)
@@ -69,13 +69,13 @@ def speech_to_text(filename=None, bytes=None, request_id=uuid.uuid4().hex, topic
 	        if max_confidence != - float("inf"):
             	return text
         	else:
-# выброска исключений если текс не найден или неизвестная ошибка
+## выброска исключений если текс не найден или неизвестная ошибка
             	raise SpeechException('No text found.\n\nResponse:\n%s' % (response_text))
     	else:
         	raise SpeechException('No text found.\n\nResponse:\n%s' % (response_text))
 	else:
     	raise SpeechException('Unknown error.\nCode: %s\n\n%s' % (response.code, response.read()))
  
-# исключение
+## исключение
 сlass SpeechException(Exception):
 	pass
